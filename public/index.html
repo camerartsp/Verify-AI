@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +13,6 @@
         }
     </style>
 </head>
-
 <body class="flex flex-col w-full min-h-screen bg-gray-100 dark:bg-gray-900">
     <header class="bg-white dark:bg-gray-800 shadow-sm">
         <div class="container mx-auto py-4 px-6 flex items-center justify-between">
@@ -26,24 +24,38 @@
             <div class="text-center space-y-2">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-gray-100">Detectar. Verificar. Confirmar.</h2>
                 <p class="text-gray-600 dark:text-gray-400">
-                    Identifique notícias falsas com IA. Análise rápida e verificação precisa da autenticidade das
-                    informações.
+                    Identifique notícias falsas com IA. Análise rápida e verificação precisa da autenticidade das informações.
                 </p>
             </div>
             <form id="verify-form" class="relative">
                 <div class="relative">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        class="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        class="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+                    >
                         <circle cx="11" cy="11" r="8"></circle>
                         <path d="m21 21-4.3-4.3"></path>
                     </svg>
-                    <input id="news-url"
+                    <input
+                        id="news-url"
                         class="flex h-10 w-full border border-input px-12 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pl-12 pr-4 py-3 rounded-lg bg-white dark:bg-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Digite a notícia para verificar" type="text" name="url" />
+                        placeholder="Digite a notícia para verificar"
+                        type="text"
+                        name="url"
+                    />
                 </div>
-                <button type="submit"
-                    class="mt-4 w-full bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-600">
+                <button
+                    type="submit"
+                    class="mt-4 w-full bg-blue-500 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-600"
+                >
                     Verificar
                 </button>
             </form>
@@ -55,9 +67,18 @@
                 <div class="space-y-2">
                     <p id="result-text" class="text-gray-700 dark:text-gray-400"></p>
                     <div class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="h-5 w-5 text-gray-500 dark:text-gray-400">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-5 w-5 text-gray-500 dark:text-gray-400"
+                        >
                             <circle cx="12" cy="12" r="10"></circle>
                             <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
                             <path d="M2 12h20"></path>
@@ -65,9 +86,18 @@
                         <span id="result-source" class="truncate-url text-gray-600 dark:text-gray-400"></span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                            class="h-5 w-5 text-green-500">
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="24"
+                            height="24"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            class="h-5 w-5 text-green-500"
+                        >
                             <circle cx="12" cy="12" r="10"></circle>
                             <path d="m9 12 2 2 4-4"></path>
                         </svg>
@@ -92,7 +122,7 @@
 
             resultDiv.classList.add('hidden');
             resultStatus.textContent = '';
-            resultStatus.classList.remove('bg-green-500', 'bg-red-500', 'bg-yellow-500');
+            resultStatus.classList.remove('bg-green-500', 'bg-red-500');
             resultText.textContent = '';
             resultSource.textContent = '';
             resultAccuracy.textContent = '';
@@ -116,22 +146,12 @@
 
                 const data = await response.json();
                 if (data.riskScore && data.summary && data.accuracy) {
-                    let statusColor;
-                    if (data.riskScore.toLowerCase() === 'confiável') {
-                        statusColor = 'bg-green-500';
-                    } else if (data.riskScore.toLowerCase() === 'não confiável') {
-                        statusColor = 'bg-red-500';
-                    } else if (data.riskScore.toLowerCase() === 'moderadamente confiável') {
-                        statusColor = 'bg-yellow-500';
-                    } else {
-                        statusColor = 'bg-gray-500';
-                    }
-
-                    resultStatus.textContent = data.riskScore;
-                    resultStatus.classList.add(statusColor);
-                    resultText.textContent = data.summary;
-                    resultSource.textContent = data.url;
-                    resultAccuracy.textContent = `Precisão: ${data.accuracy}`;
+                    const isReliable = data.riskScore.toLowerCase().includes('confiável');
+                    resultStatus.textContent = isReliable ? 'Confiável' : 'Não Confiável';
+                    resultStatus.classList.add(isReliable ? 'bg-green-500' : 'bg-red-500');
+                    resultText.textContent = data.summary; // Mini descrição sumarizada
+                    resultSource.textContent = data.url; // URL da notícia, truncada automaticamente pelo CSS
+                    resultAccuracy.textContent = `Precisão: ${data.accuracy}`; // Precisão definida pela IA
                 } else {
                     resultStatus.textContent = 'Erro';
                     resultStatus.classList.add('bg-red-500');
@@ -149,5 +169,4 @@
         });
     </script>
 </body>
-
 </html>
