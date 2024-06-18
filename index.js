@@ -13,21 +13,20 @@ const genAI = new GoogleGenerativeAI(apiKey);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Configuração do Puppeteer com base no ambiente
-const isRender = process.env.RENDER === 'true';
-const puppeteerOptions = isRender
-  ? {
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      executablePath: '/opt/render/.cache/puppeteer/chrome-linux/chrome'
-    }
-  : {};
+const isRender = process.env.RENDER === "true";
+const puppeteerOptions = isRender ? { 
+  headless: true, 
+  args: ['--no-sandbox', '--disable-setuid-sandbox'], 
+  executablePath: '/opt/render/.cache/puppeteer/chrome/linux-126.0.6478.61/chrome' 
+} : { headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] };
 
+// Função para extrair texto da página
 async function extractTextFromPage(url) {
   const browser = await puppeteer.launch(puppeteerOptions);
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
+  // Tenta encontrar o texto usando diferentes seletores comuns
   const selectorsToTry = ['body', 'article', 'main', '#content', '.content'];
   let textContent = '';
   for (const selector of selectorsToTry) {
@@ -49,6 +48,25 @@ async function extractTextFromPage(url) {
     return null;
   }
   return textContent;
+}
+
+// Função para extrair informações da análise da IA
+function extractAnalysisData(analysisText) {
+  const riskScoreMatch = analysisText.match(/Risk Score:\s*(.*)/);
+  const summaryMatch = analysisText.match(/Summary:\s*(.*)/);
+  const accuracyMatch = analysisText.match(/Accuracy Percentage:\s*(.*)/);
+
+  let riskScore = riskScoreMatch ? riskScoreMatch[1].trim() : 'Unknown';
+  
+  if (riskScore.toLowerCase().includes('medium')) {
+    riskScore = 'Moderadamente Confiável';
+  }
+
+  return {
+    riskScore,
+    summary: summaryMatch ? summaryMatch[1].trim() : 'No summary available',
+    accuracy: accuracyMatch ? accuracyMatch[1].trim() : 'Unknown',
+  };
 }
 
 async function analyzeNews(url) {
