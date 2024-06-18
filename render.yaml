@@ -7,7 +7,7 @@ services:
   plan: free
   envVars:
   - key: GEMINI_API_KEY
-    sync: false
+    sync: true
   region: oregon
   buildCommand: npm install && npx puppeteer browsers install chrome
   startCommand: node index.js
