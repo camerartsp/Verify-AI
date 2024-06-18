@@ -1,17 +1,18 @@
+# Exported from Render on 2024-06-18T22:13:42Z
 services:
-  - type: web
-    name: Verify-AI
-    runtime: node
-    repo: https://github.com/camerartsp/Verify-AI
-    plan: free
-    buildCommand: npm install && npm run install-puppeteer
-    startCommand: node index.js
-    envVars:
-      - key: PORT
-        sync: false
-      - key: GEMINI_API_KEY
-        sync: false
-      - key: RENDER
-        value: "true"
-    region: oregon
+- type: web
+  name: Verify-AI
+  runtime: node
+  repo: https://github.com/camerartsp/Verify-AI
+  plan: free
+  envVars:
+  - key: RENDER
+    sync: false
+  - key: PORT
+    sync: false
+  - key: GEMINI_API_KEY
+    sync: false
+  region: oregon
+  buildCommand: npm install
+  startCommand: node index.js
 version: "1"
