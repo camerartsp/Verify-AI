@@ -1,0 +1,14 @@
+# Exported from Render on 2024-06-17T18:00:51Z
+services:
+- type: web
+  name: Verify-AI
+  runtime: node
+  repo: https://github.com/camerartsp/Verify-AI
+  plan: free
+  envVars:
+  - key: GEMINI_API_KEY
+    sync: false
+  region: oregon
+  buildCommand: npm install && npx puppeteer browsers install chrome
+  startCommand: node index.js
+version: "1"
