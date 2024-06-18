@@ -13,13 +13,14 @@ const genAI = new GoogleGenerativeAI(apiKey);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-// Função para extrair texto da página, agora com suporte a diferentes seletores
 async function extractTextFromPage(url) {
-  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await puppeteer.launch({
+    headless: true,
+    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || null,
+  });
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-  // Tenta encontrar o texto usando diferentes seletores comuns
   const selectorsToTry = ['body', 'article', 'main', '#content', '.content'];
   let textContent = '';
   for (const selector of selectorsToTry) {
@@ -38,28 +39,26 @@ async function extractTextFromPage(url) {
 
   if (textContent === '') {
     console.warn('Não foi possível extrair o texto da página usando nenhum dos seletores padrão.');
-    return null; // Indica que o texto não foi encontrado
+    return null;
   }
   return textContent;
 }
 
-// Função para extrair informações da análise da IA
 function extractAnalysisData(analysisText) {
   const riskScoreMatch = analysisText.match(/Risk Score:\s*(.*)/);
   const summaryMatch = analysisText.match(/Summary:\s*(.*)/);
   const accuracyMatch = analysisText.match(/Accuracy Percentage:\s*(.*)/);
 
   let riskScore = riskScoreMatch ? riskScoreMatch[1].trim() : 'Unknown';
-  
-  // Nova lógica para a categoria intermediária
+
   if (riskScore.toLowerCase().includes('medium')) {
-      riskScore = 'Moderadamente Confiável';
+    riskScore = 'Moderadamente Confiável';
   }
 
   return {
-      riskScore,
-      summary: summaryMatch ? summaryMatch[1].trim() : 'No summary available',
-      accuracy: accuracyMatch ? accuracyMatch[1].trim() : 'Unknown',
+    riskScore,
+    summary: summaryMatch ? summaryMatch[1].trim() : 'No summary available',
+    accuracy: accuracyMatch ? accuracyMatch[1].trim() : 'Unknown',
   };
 }
 
@@ -72,7 +71,7 @@ async function analyzeNews(url) {
 
     const model = genAI.getGenerativeModel({
       model: 'gemini-1.5-flash',
-      systemInstruction: 'You are a specialized AI model designed to analyze the reliability of news articles based on their content. Provide evidence to support your analysis.', // Solicita evidência
+      systemInstruction: 'You are a specialized AI model designed to analyze the reliability of news articles based on their content. Provide evidence to support your analysis.',
     });
 
     const generationConfig = {
