@@ -1,0 +1,20 @@
+{
+  "name": "verify-ai",
+  "version": "1.0.0",
+  "description": "VerifyAI é uma aplicação web que utiliza IA para analisar a confiabilidade de notícias. Ele extrai texto de artigos de notícias, envia o texto para a API Gemini para análise e exibe um resumo, uma pontuação de precisão e uma indicação de confiabilidade.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@google/generative-ai": "^0.13.0",
+    "body-parser": "^1.20.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "puppeteer": "^22.11.2"
+  }
+}
