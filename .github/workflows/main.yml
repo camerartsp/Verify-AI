@@ -23,13 +23,16 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
-        node-version: '14'
+        node-version: '16.x'
 
     - name: Install dependencies
       run: npm install
 
-    - name: Run tests
+    - name: Run server
       run: |
-        node index.js & # Start the server
-        sleep 5 # Wait for the server to start
-        curl -X POST http://localhost:3000/analyze -d "url=https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html" # Test the news analysis function
+        nohup node index.js &
+        sleep 15 # Aguardar o servidor iniciar
+
+    - name: Test news analysis
+      run: |
+        curl -X POST http://localhost:3000/analyze -d "url=https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html"
