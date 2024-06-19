@@ -1,0 +1,27 @@
+name: CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: npm test
+
+      - name: Run backend analysis with a news URL
+        env:
+          NEWS_URL: "https://www.google.com/url?sa=t&source=web&rct=j&opi=89978449&url=https://www.tudocelular.com/tech/noticias/n222518/gpt-4-aprovado-teste-turing.html&ved=2ahUKEwi2vuTkx-aGAxXhPrkGHZd_DeUQxfQBKAB6BAgFEAI&usg=AOvVaw0Dmc_WAo-ABviptRdjgrKi"
+        run: node index.js
