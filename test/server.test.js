@@ -1,5 +1,6 @@
 // Arquivo: test/server.test.js
 
+const { expect } = require('chai');
 const request = require('supertest');
 const app = require('../index'); // Assumindo que seu arquivo principal é index.js
 
@@ -13,4 +14,4 @@ describe('Testes do Servidor Express', () => {
     const res = await request(app).get('/');
     expect(res.text).to.include('VerifyAI');
   });
-});￼Enter
+});
