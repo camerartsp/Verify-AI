@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('../index'); // Certifique-se de exportar seu app do index.js
+const app = require('.../index');
 const { expect } = require('chai');
 
 describe('POST /analyze', function() {

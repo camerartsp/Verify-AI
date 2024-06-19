@@ -1,8 +1,8 @@
-const { analyzeNews } = require('./index.js');
+const { analyzeNews } = require('./index');
 require('dotenv').config();
 
 async function testAnalyzeNews() {
-  const url = 'https://example.com'; // Use um URL válido para um teste real
+  const url = 'https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html'; // Use um URL válido para um teste real
   try {
     const result = await analyzeNews(url);
     console.log('Resultado da Análise:', result);
