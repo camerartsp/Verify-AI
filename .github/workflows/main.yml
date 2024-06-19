@@ -32,13 +32,29 @@ jobs:
       run: |
         nohup node index.js > server.log 2>&1 &
         sleep 15 # Aguardar o servidor iniciar
-        cat server.log # Mostrar logs do servidor
+        echo "Checking if server is running..."
+        if ! nc -zv localhost 3000; then
+          echo "Server is not running"
+          cat server.log
+          exit 1
+        fi
+
+    - name: Display server logs
+      run: cat server.log
 
     - name: Test news analysis
       run: |
-        response=$(curl -X POST http://localhost:3000/analyze -d "url=https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html")
-        echo "Response: $response"
-        if [[ "$response" != *"confiável"* && "$response" != *"95%"* ]]; then
-          echo "Test failed"
+        response=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:3000/analyze -d "url=https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html")
+        echo "HTTP Status Code: $response"
+        if [ "$response" -ne 200 ]; then
+          echo "Test failed: Non-200 HTTP status code"
+          cat server.log
+          exit 1
+        fi
+        response_body=$(curl -X POST http://localhost:3000/analyze -d "url=https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html")
+        echo "Response: $response_body"
+        if [[ "$response_body" != *"confiável"* && "$response_body" != *"95%"* ]]; then
+          echo "Test failed: Unexpected response body"
+          cat server.log
           exit 1
         fi
