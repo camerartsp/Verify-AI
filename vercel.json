@@ -8,7 +8,12 @@
     ],
     "routes": [
       {
-        "src": "/(.*)",
+        "src": "/",
+        "dest": "/index.html"
+      },
+      {
+        "src": "/analyze",
+        "methods": ["POST"],
         "dest": "index.js"
       }
     ]
