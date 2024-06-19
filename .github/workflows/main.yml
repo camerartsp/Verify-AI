@@ -28,6 +28,13 @@ jobs:
     - name: Install dependencies
       run: npm install
 
+    - name: Install Chrome for Puppeteer
+      run: |
+        npx puppeteer browsers install chrome
+
+    - name: Set GEMINI_API_KEY
+      run: echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> $GITHUB_ENV
+
     - name: Run server
       run: |
         nohup node index.js > server.log 2>&1 &
