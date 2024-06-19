@@ -30,9 +30,15 @@ jobs:
 
     - name: Run server
       run: |
-        nohup node index.js &
+        nohup node index.js > server.log 2>&1 &
         sleep 15 # Aguardar o servidor iniciar
+        cat server.log # Mostrar logs do servidor
 
     - name: Test news analysis
       run: |
-        curl -X POST http://localhost:3000/analyze -d "url=https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html"
+        response=$(curl -X POST http://localhost:3000/analyze -d "url=https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html")
+        echo "Response: $response"
+        if [[ "$response" != *"confiável"* && "$response" != *"95%"* ]]; then
+          echo "Test failed"
+          exit 1
+        fi
