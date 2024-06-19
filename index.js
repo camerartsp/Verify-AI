@@ -13,41 +13,42 @@ const genAI = new GoogleGenerativeAI(apiKey);
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-const isRender = process.env.RENDER === "true";
-const puppeteerOptions = isRender ? { 
-  headless: true, 
-  args: ['--no-sandbox', '--disable-setuid-sandbox'], 
-  executablePath: '/opt/render/.cache/puppeteer/chrome/linux-126.0.6478.61/chrome' 
-} : { headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] };
-
-// Função para extrair texto da página
+// Função para extrair texto da página, agora com suporte a diferentes seletores
 async function extractTextFromPage(url) {
-  const browser = await puppeteer.launch(puppeteerOptions);
-  const page = await browser.newPage();
-  await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+  let browser;
+  try {
+    browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    const page = await browser.newPage();
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
 
-  // Tenta encontrar o texto usando diferentes seletores comuns
-  const selectorsToTry = ['body', 'article', 'main', '#content', '.content'];
-  let textContent = '';
-  for (const selector of selectorsToTry) {
-    try {
-      console.log(`Tentando extrair texto com o seletor '${selector}' na página ${url}`);
-      await page.waitForSelector(selector, { timeout: 10000 });
-      textContent = await page.evaluate((selector) => document.querySelector(selector).innerText, selector);
-      console.log(`Texto extraído com sucesso usando o seletor '${selector}'.`);
-      break;
-    } catch (error) {
-      console.log(`Não foi possível extrair texto com o seletor '${selector}':`, error.message);
+    // Tenta encontrar o texto usando diferentes seletores comuns
+    const selectorsToTry = ['body', 'article', 'main', '#content', '.content'];
+    let textContent = '';
+    for (const selector of selectorsToTry) {
+      try {
+        console.log(`Tentando extrair texto com o seletor '${selector}' na página ${url}`);
+        await page.waitForSelector(selector, { timeout: 10000 });
+        textContent = await page.evaluate((selector) => document.querySelector(selector).innerText, selector);
+        console.log(`Texto extraído com sucesso usando o seletor '${selector}'.`);
+        break;
+      } catch (error) {
+        console.log(`Não foi possível extrair texto com o seletor '${selector}':`, error.message);
+      }
+    }
+
+    if (textContent === '') {
+      console.warn('Não foi possível extrair o texto da página usando nenhum dos seletores padrão.');
+      return null; // Indica que o texto não foi encontrado
+    }
+    return textContent;
+  } catch (error) {
+    console.error(`Erro ao extrair texto da página: ${error.message}`);
+    return null;
+  } finally {
+    if (browser) {
+      await browser.close();
     }
   }
-
-  await browser.close();
-
-  if (textContent === '') {
-    console.warn('Não foi possível extrair o texto da página usando nenhum dos seletores padrão.');
-    return null;
-  }
-  return textContent;
 }
 
 // Função para extrair informações da análise da IA
@@ -57,7 +58,8 @@ function extractAnalysisData(analysisText) {
   const accuracyMatch = analysisText.match(/Accuracy Percentage:\s*(.*)/);
 
   let riskScore = riskScoreMatch ? riskScoreMatch[1].trim() : 'Unknown';
-  
+
+  // Nova lógica para a categoria intermediária
   if (riskScore.toLowerCase().includes('medium')) {
     riskScore = 'Moderadamente Confiável';
   }
@@ -78,7 +80,7 @@ async function analyzeNews(url) {
 
     const model = genAI.getGenerativeModel({
       model: 'gemini-1.5-flash',
-      systemInstruction: 'You are a specialized AI model designed to analyze the reliability of news articles based on their content. Provide evidence to support your analysis.',
+      systemInstruction: 'You are a specialized AI model designed to analyze the reliability of news articles based on their content. Provide evidence to support your analysis.', // Solicita evidência
     });
 
     const generationConfig = {
@@ -137,3 +139,5 @@ app.post('/analyze', async (req, res) => {
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
 });
+
+module.exports = app;

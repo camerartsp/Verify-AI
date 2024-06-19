@@ -47,6 +47,7 @@
                     Verificar
                 </button>
             </form>
+            <div id="loading" class="hidden text-center text-gray-700 dark:text-gray-400">Analisando...</div>
             <div id="result" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 space-y-4 hidden">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Resultado da Verificação</h2>
@@ -89,8 +90,10 @@
             const resultText = document.getElementById('result-text');
             const resultSource = document.getElementById('result-source');
             const resultAccuracy = document.getElementById('result-accuracy');
+            const loadingDiv = document.getElementById('loading');
 
             resultDiv.classList.add('hidden');
+            loadingDiv.classList.remove('hidden');
             resultStatus.textContent = '';
             resultStatus.classList.remove('bg-green-500', 'bg-red-500', 'bg-yellow-500');
             resultText.textContent = '';
@@ -102,6 +105,7 @@
                 resultStatus.classList.add('bg-red-500');
                 resultText.textContent = 'Por favor, insira um link válido.';
                 resultDiv.classList.remove('hidden');
+                loadingDiv.classList.add('hidden');
                 return;
             }
 
@@ -145,6 +149,8 @@
                 resultStatus.classList.add('bg-red-500');
                 resultText.textContent = 'Erro ao verificar a notícia.';
                 resultDiv.classList.remove('hidden');
+            } finally {
+                loadingDiv.classList.add('hidden');
             }
         });
     </script>
