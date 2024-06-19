@@ -16,11 +16,5 @@
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
     "puppeteer": "^22.11.2"
-  },
-  "devDependencies": {
-    "chai": "^5.1.1",
-    "esm": "^3.2.25",
-    "mocha": "^10.4.0",
-    "supertest": "^7.0.0"
   }
 }
