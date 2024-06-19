@@ -51,17 +51,18 @@ jobs:
 
     - name: Test news analysis
       run: |
-        response=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://localhost:3000/analyze -d "url=https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html")
-        echo "HTTP Status Code: $response"
-        if [ "$response" -ne 200 ]; then
-          echo "Test failed: Non-200 HTTP status code"
-          cat server.log
+        response=$(curl -s -X POST http://localhost:3000/analyze -d "url=https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html")
+        echo "Response: $response"
+        if ! echo "$response" | jq -e '.riskScore, .summary, .accuracy, .url' > /dev/null; then
+          echo "Test failed: Response does not contain expected keys"
           exit 1
         fi
-        response_body=$(curl -X POST http://localhost:3000/analyze -d "url=https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html")
-        echo "Response: $response_body"
-        if [[ "$response_body" != *"confiável"* && "$response_body" != *"95%"* ]]; then
-          echo "Test failed: Unexpected response body"
-          cat server.log
+        if [[ "$(echo "$response" | jq -r '.riskScore')" != "High" ]]; then
+          echo "Test failed: Unexpected risk score"
           exit 1
         fi
+        if [[ "$(echo "$response" | jq -r '.accuracy')" != "Low to Medium" ]]; then
+          echo "Test failed: Unexpected accuracy"
+          exit 1
+        fi
+        echo "Test passed"
