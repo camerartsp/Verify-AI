@@ -1,5 +1,5 @@
 const request = require('supertest');
-const app = require('/workspaces/Verify-AI/index.js');
+const app = require('../index');
 const { expect } = require('chai');
 
 describe('POST /analyze', function() {
