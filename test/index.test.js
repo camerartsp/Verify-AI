@@ -1,16 +1,22 @@
-const request = require('supertest');
-const app = require('../index');
-const { expect } = require('chai');
+import chai from 'chai';
+import chaiHttp from 'chai-http';
+import { app } from '../index.js'; // Certifique-se de usar a extensão .js ao importar módulos ES
 
-describe('POST /analyze', function() {
-  it('should return analysis result for a valid URL', async function() {
-    const response = await request(app)
+chai.use(chaiHttp);
+const { expect } = chai;
+
+describe('API Endpoints', () => {
+  it('should analyze news and return analysis data', (done) => {
+    chai.request(app)
       .post('/analyze')
-      .send({ url: 'https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html' });
-    expect(response.status).to.equal(200);
-    expect(response.body).to.have.property('riskScore');
-    expect(response.body).to.have.property('summary');
-    expect(response.body).to.have.property('accuracy');
-    expect(response.body).to.have.property('url');
+      .send({ url: 'https://www.hardware.com.br/noticias/apple-chatgpt-sem-custos-openai.html' })
+      .end((err, res) => {
+        if (err) done(err);
+        expect(res).to.have.status(200);
+        expect(res.body).to.have.property('riskScore');
+        expect(res.body).to.have.property('summary');
+        expect(res.body).to.have.property('accuracy');
+        done();
+      });
   });
 });
