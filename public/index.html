@@ -5,6 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VerifyAI</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .preview {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f9f9f9;
+            position: relative;
+        }
+        .preview img, .preview video {
+            max-width: 100px;
+            max-height: 100px;
+            margin-right: 10px;
+            border-radius: 4px;
+        }
+        .preview button {
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 50%;
+            cursor: pointer;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .preview button:hover {
+            background-color: #ff1a1a;
+        }
+    </style>
 </head>
 <body class="flex flex-col w-full min-h-screen bg-gray-100 dark:bg-gray-900">
     <header class="bg-white dark:bg-gray-800 shadow-sm">
@@ -21,6 +53,20 @@
                     Identifique notícias falsas com IA. Análise rápida e verificação precisa da autenticidade das informações.
                 </p>
             </div>
+
+            <!-- Image preview -->
+            <div class="preview" id="imagePreview" style="display: none;">
+                <img id="imageElement" src="" alt="Preview da Imagem">
+                <button type="button" onclick="removeFile('image')">X</button>
+            </div>
+            <!-- Video preview -->
+            <div class="preview" id="videoPreview" style="display: none;">
+                <video id="videoElement" controls>
+                    <source id="videoSource" src="" type="">
+                </video>
+                <button type="button" onclick="removeFile('video')">X</button>
+            </div>
+
             <div class="relative">
                 <button id="analyze-btn" class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 absolute left-4 top-1/2 -translate-y-1/2 rounded-lg">
                     <svg
@@ -85,6 +131,7 @@
                     <input id="video-upload" type="file" accept="video/*" class="hidden" />
                 </div>
             </div>
+
             <div id="loading" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center" style="display: none;">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
                 <p class="mt-2 text-gray-700 dark:text-gray-300">Analisando...</p>
@@ -112,141 +159,66 @@
                             class="h-5 w-5 text-gray-500 dark:text-gray-400"
                         >
                             <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
-                            <path d="M2 12h20"></path>
+                            <path d="M14.31 8a4 4 0 0 1 0 8M10 8v8"></path>
                         </svg>
-                        <span id="result-source" class="text-gray-600 dark:text-gray-400">Fonte: www.exemplo.com</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="2"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                            class="h-5 w-5 text-green-500"
-                        >
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="m9 12 2 2 4-4"></path>
-                        </svg>
-                        <span id="result-accuracy" class="text-gray-600 dark:text-gray-400">Precisão: 95%</span>
+                        <span id="result-date" class="text-gray-600 dark:text-gray-400">Data: 01/01/2022</span>
                     </div>
                 </div>
             </div>
         </div>
     </main>
-
-    <footer class="bg-white dark:bg-gray-800 shadow-sm py-4 px-6 text-center text-gray-600 dark:text-gray-400">
-        <p>Criado por Jlocked | Powered by Gemini API</p>
+    <footer class="bg-white dark:bg-gray-800 shadow-sm">
+        <div class="container mx-auto py-4 px-6 flex items-center justify-between">
+            <p class="text-sm text-gray-600 dark:text-gray-400">© 2024 VerifyAI. Todos os direitos reservados.</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">Criado por Jlocked | Powered by Gemini API</p>
+        </div>
     </footer>
 
-    <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-2xl w-full mx-4">
-            <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Explicação Completa</h3>
-            <p id="modal-explanation" class="text-gray-700 dark:text-gray-400 mb-4"></p>
-            <button id="close-modal" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Fechar</button>
-        </div>
-    </div>
-
     <script>
-        let uploadedImage = null;
-        let uploadedVideo = null;
-
-        document.getElementById('image-upload').addEventListener('change', (event) => {
-            uploadedImage = event.target.files[0];
-            document.getElementById('news-input').placeholder = "Imagem selecionada: " + uploadedImage.name;
+        document.getElementById('image-upload').addEventListener('change', function(event) {
+            previewFile(event, 'image');
         });
 
-        document.getElementById('video-upload').addEventListener('change', (event) => {
-            uploadedVideo = event.target.files[0];
-            document.getElementById('news-input').placeholder = "Vídeo selecionado: " + uploadedVideo.name;
+        document.getElementById('video-upload').addEventListener('change', function(event) {
+            previewFile(event, 'video');
         });
 
-        document.getElementById('analyze-btn').addEventListener('click', async () => {
-            const input = document.getElementById('news-input').value;
-            
-            if (!input && !uploadedImage && !uploadedVideo) {
-                alert('Por favor, insira um texto, imagem ou vídeo para analisar.');
-                return;
+        function previewFile(event, type) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const previewElement = document.getElementById(`${type}Element`);
+            const previewContainer = document.getElementById(`${type}Preview`);
+
+            if (type === 'image') {
+                previewElement.src = URL.createObjectURL(file);
+                previewElement.style.display = 'block';
+            } else if (type === 'video') {
+                const videoSource = document.getElementById('videoSource');
+                videoSource.src = URL.createObjectURL(file);
+                videoSource.type = file.type;
+                previewElement.style.display = 'block';
             }
 
-            document.getElementById('loading').style.display = 'block';
-            document.getElementById('result').style.display = 'none';
-
-            const formData = new FormData();
-            if (input) formData.append('text', input);
-            if (uploadedImage) formData.append('image', uploadedImage);
-            if (uploadedVideo) formData.append('video', uploadedVideo);
-
-            try {
-                const response = await fetch('/analisar', {
-                    method: 'POST',
-                    body: formData,
-                });
-
-                if (!response.ok) {
-                    throw new Error('Falha na análise');
-                }
-
-                const result = await response.json();
-                
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('result').style.display = 'block';
-                
-                const fullExplanation = result.explicacao;
-                const summary = fullExplanation.length > 100 ? 
-                    fullExplanation.substring(0, 100).trim() + '...' : 
-                    fullExplanation;
-                
-                document.getElementById('result-summary').textContent = summary;
-                document.getElementById('result-explanation').textContent = fullExplanation;
-                document.getElementById('modal-explanation').textContent = fullExplanation;
-                
-                const sourceUrl = result.fonte || extractUrl(input) || 'Não especificada';
-                document.getElementById('result-source').textContent = `Fonte: ${sourceUrl}`;
-                
-                document.getElementById('result-accuracy').textContent = `Precisão: ${result.pontuacaoCredibilidade}%`;
-
-                const credibilityBadge = document.getElementById('credibility-badge');
-                if (result.eConfiavel) {
-                    credibilityBadge.textContent = 'Confiável';
-                    credibilityBadge.classList.remove('bg-red-500');
-                    credibilityBadge.classList.add('bg-green-500');
-                } else {
-                    credibilityBadge.textContent = 'Não confiável';
-                    credibilityBadge.classList.remove('bg-green-500');
-                    credibilityBadge.classList.add('bg-red-500');
-                }
-            } catch (error) {
-                console.error('Erro:', error);
-                alert('Ocorreu um erro ao analisar a notícia. Por favor, tente novamente.');
-                document.getElementById('loading').style.display = 'none';
-            }
-        });
-
-        function extractUrl(text) {
-            const urlRegex = /(https?:\/\/[^\s]+)/g;
-            const match = text.match(urlRegex);
-            return match ? match[0] : null;
+            previewContainer.style.display = 'flex';
         }
 
-        document.getElementById('show-full-explanation').addEventListener('click', () => {
-            document.getElementById('modal').classList.remove('hidden');
-        });
+        function removeFile(type) {
+            const inputElement = document.getElementById(`${type}-upload`);
+            inputElement.value = '';
+            const previewElement = document.getElementById(`${type}Element`);
+            previewElement.src = '';
+            previewElement.style.display = 'none';
 
-        document.getElementById('close-modal').addEventListener('click', () => {
-            document.getElementById('modal').classList.add('hidden');
-        });
-
-        document.getElementById('modal').addEventListener('click', (event) => {
-            if (event.target === event.currentTarget) {
-                event.target.classList.add('hidden');
+            if (type === 'video') {
+                const videoSource = document.getElementById('videoSource');
+                videoSource.src = '';
+                videoSource.type = '';
             }
-        });
+
+            const previewContainer = document.getElementById(`${type}Preview`);
+            previewContainer.style.display = 'none';
+        }
     </script>
 </body>
 </html>
