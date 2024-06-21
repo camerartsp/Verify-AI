@@ -23,10 +23,6 @@ app.post('/analisar', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'vi
 
         const resultado = await analisarNoticia(texto, imagem, video);
 
-        // Limpeza de arquivos temporários
-        if (imagem) fs.unlinkSync(imagem.path);
-        if (video) fs.unlinkSync(video.path);
-
         res.json(resultado);
     } catch (error) {
         console.error('Erro detalhado:', error);

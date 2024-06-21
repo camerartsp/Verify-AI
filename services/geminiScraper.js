@@ -39,7 +39,7 @@ async function analisarNoticia(texto, imagem, video) {
     let parts = [];
 
     if (conteudo) {
-      parts.push({text: conteudo});
+      parts.push({ text: conteudo });
     }
 
     if (imagem) {
@@ -47,8 +47,8 @@ async function analisarNoticia(texto, imagem, video) {
       parts.push({
         inlineData: {
           mimeType: imagem.mimetype,
-          data: base64Image
-        }
+          data: base64Image,
+        },
       });
     }
 
@@ -57,8 +57,8 @@ async function analisarNoticia(texto, imagem, video) {
       parts.push({
         inlineData: {
           mimeType: video.mimetype,
-          data: base64Video
-        }
+          data: base64Video,
+        },
       });
     }
 
@@ -72,7 +72,7 @@ async function analisarNoticia(texto, imagem, video) {
       Explicação: [sua explicação]
     `;
 
-    parts.push({text: prompt});
+    parts.push({ text: prompt });
 
     const chatSession = model.startChat({
       generationConfig,
@@ -110,6 +110,9 @@ async function analisarNoticia(texto, imagem, video) {
 
   } catch (erro) {
     console.error('Erro:', erro);
+    // Limpar arquivos temporários em caso de erro
+    if (imagem) await fs.unlink(imagem.path).catch(() => {});
+    if (video) await fs.unlink(video.path).catch(() => {});
     return {
       erro: 'Erro ao analisar o artigo. Por favor, tente novamente.',
     };
