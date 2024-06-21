@@ -3,8 +3,7 @@ const vision = require('@google-cloud/vision');
 const fs = require('fs');
 require("dotenv").config();
 
-const apiKey = process.env.GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const model = genAI.getGenerativeModel({
   model: "gemini-1.5-pro",
