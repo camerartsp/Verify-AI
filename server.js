@@ -1,5 +1,6 @@
 const express = require('express');
 const multer = require('multer');
+const fs = require('fs');
 const { analisarNoticia } = require('./services/geminiScraper');
 
 const app = express();
@@ -15,15 +16,24 @@ app.post('/analisar', upload.fields([{ name: 'image', maxCount: 1 }, { name: 'vi
         const imagem = req.files?.image?.[0];
         const video = req.files?.video?.[0];
 
+        // Validação básica
+        if (!texto && !imagem && !video) {
+            return res.status(400).json({ erro: 'É necessário fornecer pelo menos texto, imagem ou vídeo.' });
+        }
+
         const resultado = await analisarNoticia(texto, imagem, video);
+
+        // Limpeza de arquivos temporários
+        if (imagem) fs.unlinkSync(imagem.path);
+        if (video) fs.unlinkSync(video.path);
 
         res.json(resultado);
     } catch (error) {
-        console.error('Erro:', error);
-        res.status(500).json({ erro: 'Falha ao analisar o conteúdo.' });
+        console.error('Erro detalhado:', error);
+        res.status(500).json({ erro: 'Falha ao analisar o conteúdo.', detalhes: error.message });
     }
-});
+}); 
 
 app.listen(porta, () => {
-  console.log(`Servidor rodando em http://localhost:${porta}`);
+    console.log(`Servidor rodando em http://localhost:${porta}`);
 });

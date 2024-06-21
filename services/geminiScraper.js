@@ -1,6 +1,9 @@
-const { GoogleGenerativeAI, HarmCategory, HarmBlockThreshold } = require("@google/generative-ai");
-const vision = require('@google-cloud/vision');
-const fs = require('fs');
+const {
+  GoogleGenerativeAI,
+  HarmCategory,
+  HarmBlockThreshold,
+} = require("@google/generative-ai");
+const fs = require('fs').promises;
 require("dotenv").config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -25,27 +28,51 @@ const generationConfig = {
   maxOutputTokens: 1024,
 };
 
+async function fileToBase64(filePath) {
+  const fileContent = await fs.readFile(filePath);
+  return fileContent.toString('base64');
+}
+
 async function analisarNoticia(texto, imagem, video) {
   try {
     let conteudo = texto || '';
+    let parts = [];
+
+    if (conteudo) {
+      parts.push({text: conteudo});
+    }
 
     if (imagem) {
-      const client = new vision.ImageAnnotatorClient();
-      const [result] = await client.textDetection(imagem.path);
-      const detections = result.textAnnotations;
-      conteudo += detections.length ? detections[0].description : '';
-      fs.unlinkSync(imagem.path);
+      const base64Image = await fileToBase64(imagem.path);
+      parts.push({
+        inlineData: {
+          mimeType: imagem.mimetype,
+          data: base64Image
+        }
+      });
     }
 
     if (video) {
-      // Placeholder for video analysis, which could include extracting frames and performing OCR or other analysis.
-      conteudo += ' Análise de vídeo não implementada. ';
-      fs.unlinkSync(video.path);
+      const base64Video = await fileToBase64(video.path);
+      parts.push({
+        inlineData: {
+          mimeType: video.mimetype,
+          data: base64Video
+        }
+      });
     }
 
-    if (!conteudo) {
-      throw new Error('Nenhum conteúdo para analisar.');
-    }
+    const prompt = `
+      Analise o seguinte conteúdo (que pode incluir texto, imagem e/ou vídeo) e determine se é confiável ou não. 
+      Forneça uma pontuação de credibilidade de 0 a 100, onde 0 é completamente falso e 100 é completamente verdadeiro.
+      Além disso, forneça uma breve explicação para sua avaliação.
+
+      Responda no seguinte formato:
+      Pontuação de Credibilidade: [número]
+      Explicação: [sua explicação]
+    `;
+
+    parts.push({text: prompt});
 
     const chatSession = model.startChat({
       generationConfig,
@@ -57,20 +84,7 @@ async function analisarNoticia(texto, imagem, video) {
       ],
     });
 
-    const prompt = `
-      Analise o seguinte artigo de notícias e determine se é confiável ou não. 
-      Forneça uma pontuação de credibilidade de 0 a 100, onde 0 é completamente falso e 100 é completamente verdadeiro.
-      Além disso, forneça uma breve explicação para sua avaliação.
-
-      Conteúdo do artigo:
-      ${conteudo}
-
-      Responda no seguinte formato:
-      Pontuação de Credibilidade: [número]
-      Explicação: [sua explicação]
-    `;
-
-    const result = await chatSession.sendMessage(prompt);
+    const result = await chatSession.sendMessage(parts);
     const resposta = result.response.text();
 
     const linhas = resposta.split('\n');
@@ -83,6 +97,10 @@ async function analisarNoticia(texto, imagem, video) {
 
     const pontuacaoCredibilidade = parseInt(pontuacaoLinha.split(':')[1].trim());
     const explicacao = linhas.slice(explicacaoInicio + 1).join('\n').trim();
+
+    // Limpar arquivos temporários
+    if (imagem) await fs.unlink(imagem.path);
+    if (video) await fs.unlink(video.path);
 
     return {
       pontuacaoCredibilidade,

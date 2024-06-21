@@ -11,7 +11,6 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@google-cloud/vision": "^4.3.0",
     "@google/generative-ai": "^0.13.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",

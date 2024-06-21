@@ -85,6 +85,10 @@
                     <input id="video-upload" type="file" accept="video/*" class="hidden" />
                 </div>
             </div>
+            <div id="loading" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 text-center" style="display: none;">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 dark:border-gray-100"></div>
+                <p class="mt-2 text-gray-700 dark:text-gray-300">Analisando...</p>
+            </div>
             <div id="result" class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 space-y-4" style="display: none;">
                 <div class="flex items-center justify-between">
                     <h2 class="text-lg font-bold text-gray-900 dark:text-gray-100">Resultado da Verificação</h2>
@@ -144,7 +148,7 @@
         <div class="bg-white dark:bg-gray-800 p-6 rounded-lg max-w-2xl w-full mx-4">
             <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-gray-100">Explicação Completa</h3>
             <p id="modal-explanation" class="text-gray-700 dark:text-gray-400 mb-4"></p>
-            <button id="close-modal" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Fechar</button>
+            <button id="close-modal" class="bg-black text-white px-4 py-2 rounded hover:bg-gray-800">Fechar</button>
         </div>
     </div>
 
@@ -170,6 +174,9 @@
                 return;
             }
 
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').style.display = 'none';
+
             const formData = new FormData();
             if (input) formData.append('text', input);
             if (uploadedImage) formData.append('image', uploadedImage);
@@ -187,9 +194,9 @@
 
                 const result = await response.json();
                 
+                document.getElementById('loading').style.display = 'none';
                 document.getElementById('result').style.display = 'block';
                 
-                // Cria o resumo da explicação
                 const fullExplanation = result.explicacao;
                 const summary = fullExplanation.length > 100 ? 
                     fullExplanation.substring(0, 100).trim() + '...' : 
@@ -199,7 +206,9 @@
                 document.getElementById('result-explanation').textContent = fullExplanation;
                 document.getElementById('modal-explanation').textContent = fullExplanation;
                 
-                document.getElementById('result-source').textContent = `Fonte: ${result.fonte || 'Não especificada'}`;
+                const sourceUrl = result.fonte || extractUrl(input) || 'Não especificada';
+                document.getElementById('result-source').textContent = `Fonte: ${sourceUrl}`;
+                
                 document.getElementById('result-accuracy').textContent = `Precisão: ${result.pontuacaoCredibilidade}%`;
 
                 const credibilityBadge = document.getElementById('credibility-badge');
@@ -215,8 +224,15 @@
             } catch (error) {
                 console.error('Erro:', error);
                 alert('Ocorreu um erro ao analisar a notícia. Por favor, tente novamente.');
+                document.getElementById('loading').style.display = 'none';
             }
         });
+
+        function extractUrl(text) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            const match = text.match(urlRegex);
+            return match ? match[0] : null;
+        }
 
         document.getElementById('show-full-explanation').addEventListener('click', () => {
             document.getElementById('modal').classList.remove('hidden');
