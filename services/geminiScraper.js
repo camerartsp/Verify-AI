@@ -3,6 +3,7 @@ const {
   HarmCategory,
   HarmBlockThreshold,
 } = require("@google/generative-ai");
+const fs = require('fs').promises;
 require("dotenv").config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -27,8 +28,9 @@ const generationConfig = {
   maxOutputTokens: 1024,
 };
 
-async function bufferToBase64(buffer) {
-  return buffer.toString('base64');
+async function fileToBase64(filePath) {
+  const fileContent = await fs.readFile(filePath);
+  return fileContent.toString('base64');
 }
 
 async function analisarNoticia(texto, imagem, video) {
@@ -41,7 +43,7 @@ async function analisarNoticia(texto, imagem, video) {
     }
 
     if (imagem) {
-      const base64Image = await bufferToBase64(imagem.buffer);
+      const base64Image = await fileToBase64(imagem.path);
       parts.push({
         inlineData: {
           mimeType: imagem.mimetype,
@@ -51,7 +53,7 @@ async function analisarNoticia(texto, imagem, video) {
     }
 
     if (video) {
-      const base64Video = await bufferToBase64(video.buffer);
+      const base64Video = await fileToBase64(video.path);
       parts.push({
         inlineData: {
           mimeType: video.mimetype,
@@ -96,6 +98,10 @@ async function analisarNoticia(texto, imagem, video) {
     const pontuacaoCredibilidade = parseInt(pontuacaoLinha.split(':')[1].trim());
     const explicacao = linhas.slice(explicacaoInicio + 1).join('\n').trim();
 
+    // Limpar arquivos temporários
+    if (imagem) await fs.unlink(imagem.path);
+    if (video) await fs.unlink(video.path);
+
     return {
       pontuacaoCredibilidade,
       explicacao,
@@ -104,6 +110,9 @@ async function analisarNoticia(texto, imagem, video) {
 
   } catch (erro) {
     console.error('Erro:', erro);
+    // Limpar arquivos temporários em caso de erro
+    if (imagem) await fs.unlink(imagem.path).catch(() => {});
+    if (video) await fs.unlink(video.path).catch(() => {});
     return {
       erro: 'Erro ao analisar o artigo. Por favor, tente novamente.',
     };
