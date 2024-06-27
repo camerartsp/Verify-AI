@@ -175,6 +175,17 @@
     </footer>
 
     <script>
+        function uploadMedia(event) {
+            const files = event.target.files;
+            if (files.length > 0) {
+                // You can add logic here to handle the uploaded files
+                console.log('Files uploaded:', files);
+                // For example, you might want to display the file names
+                const fileNames = Array.from(files).map(file => file.name).join(', ');
+                alert(`Files selected: ${fileNames}`);
+            }
+        }
+    
     function truncateText(text, maxLength) {
         if (text.length <= maxLength) return text;
         return text.substr(0, maxLength) + '...';
@@ -208,6 +219,7 @@
 
     async function verifyNews() {
         const newsInput = document.getElementById('newsInput').value;
+        const mediaInput = document.getElementById('mediaInput').files;
         const resultContainer = document.getElementById('resultContainer');
         const resultTitle = document.getElementById('resultTitle');
         const resultStatus = document.getElementById('resultStatus');
@@ -225,13 +237,16 @@
         resultContainer.classList.add('hidden');
 
         try {
-            const response = await fetch('/analisar', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ text: newsInput })
-            });
+                const formData = new FormData();
+                formData.append('text', newsInput);
+                if (mediaInput.length > 0) {
+                    formData.append('image', mediaInput[0]);
+                }
+
+                const response = await fetch('/analisar', {
+                    method: 'POST',
+                    body: formData
+                });
 
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
