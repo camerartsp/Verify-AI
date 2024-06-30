@@ -1,75 +1,94 @@
 # VerifyAI
 
-VerifyAI é uma aplicação web que utiliza IA para analisar a confiabilidade de notícias. Ele extrai texto de artigos de notícias, envia o texto para a API Gemini para análise e exibe um resumo, uma pontuação de precisão e uma indicação de confiabilidade.
+VerifyAI is a web application that uses artificial intelligence to analyze and verify the credibility of news articles. It provides users with a quick and accurate assessment of the authenticity of information, helping to combat the spread of misinformation.
 
-## Funcionalidades
+## Features
 
-- **Detecção de Notícias Falsas**: Verifique a autenticidade das informações em notícias.
-- **Análise com IA**: Utilize a API Gemini para análise avançada de texto.
-- **Interface Amigável**: Uma interface simples e intuitiva para facilitar o uso.
+- Text-based news analysis
+- Image and video content analysis (future feature)
+- Credibility scoring from 0 to 100
+- Detailed explanation of the credibility assessment
+- User-friendly web interface
 
-## Tecnologias Utilizadas
+## Tech Stack
 
-- **Node.js**: Servidor backend.
-- **Express**: Framework web para Node.js.
-- **Puppeteer**: Biblioteca para controle de navegadores.
-- **TailwindCSS**: Framework CSS para estilização rápida e eficiente.
-- **Google Generative AI**: Para análise de texto avançada.
+- Frontend: HTML, CSS (Tailwind CSS), JavaScript
+- Backend: Node.js, Express.js
+- AI Integration: Google's Generative AI (Gemini 1.5 Pro)
 
-## Pré-requisitos
+## Prerequisites
 
-- Node.js v14 ou superior
-- Conta na Google Cloud com acesso à API Gemini
+Before you begin, ensure you have met the following requirements:
 
-## Instalação
+- Node.js (v14 or higher)
+- npm (v6 or higher)
+- A Gemini API key from Google
 
-1. Clone o repositório:
+## Installation
 
-    ```sh
-    git clone https://github.com/codingpublc/VerifyAI.git
-    cd verifyai
-    ```
+1. Clone the repository:
+   ```
+   git clone https://github.com/yourusername/verifyai.git
+   cd verifyai
+   ```
 
-2. Instale as dependências:
+2. Install dependencies:
+   ```
+   npm install
+   ```
 
-    ```sh
-    npm install
-    ```
+3. Create a `.env` file in the root directory and add your Gemini API key:
+   ```
+   GEMINI_API_KEY=your_api_key_here
+   ```
 
-3. Configure as variáveis de ambiente:
+4. Start the server:
+   ```
+   node server.js
+   ```
 
-    Crie um arquivo `.env` na raiz do projeto e adicione suas credenciais da API Gemini:
+5. Open your browser and navigate to `http://localhost:3000` to use the application.
 
-    ```env
-    GEMINI_API_KEY=YOUR_GEMINI_API_KEY
-    ```
+## Usage
 
-## Uso
+1. Enter the news text you want to verify in the input field.
+2. (Future feature) Upload related images or videos if available.
+3. Click the "Verify" button to analyze the content.
+4. View the credibility score and explanation in the results section.
 
-1. Inicie o servidor:
+## Project Structure
 
-    ```sh
-    npm start
-    ```
+- `public/index.html`: Main HTML file for the web interface
+- `server.js`: Express server setup and route handling
+- `services/geminiScraper.js`: Integration with Gemini AI for content analysis
+- `uploads/`: Temporary storage for uploaded media files
 
-2. Abra o navegador e acesse `http://localhost:3000`.
+## Contributing
 
-3. Insira a URL de uma notícia no campo de texto e clique em "Verificar".
+Contributions to VerifyAI are welcome. Please follow these steps to contribute:
 
-## Estrutura do Projeto
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Commit your changes (`git commit -m 'Add some amazing feature'`)
+5. Push to the branch (`git push origin feature/amazing-feature`)
+6. Open a Pull Request
 
-- `index.js`: Servidor Express que lida com as requisições de análise.
-- `public/`: Diretório com arquivos estáticos para o frontend.
-- `public/index.html`: Interface principal do usuário.
+## License
 
-## Contribuição
+This project is licensed under the [MIT License](LICENSE).
 
-Se você quiser contribuir com o projeto ou fornecer feedback, por favor, faça um pull request.
+## Acknowledgements
 
-## Licença
+- [Google Generative AI](https://ai.google.dev/)
+- [Express.js](https://expressjs.com/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Multer](https://github.com/expressjs/multer) for handling file uploads
 
-Este projeto está licenciado sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+## Contact
 
-## Observação
+If you have any questions or feedback, please open an issue on the GitHub repository.
 
-Este é um projeto simples e, embora tenha sido projetado para funcionar corretamente, pode gerar alguns erros. Se encontrar algum problema, por favor, contribua com uma correção ou reporte o problema.
+---
+
+Created by Jlocked | Powered by Gemini API
