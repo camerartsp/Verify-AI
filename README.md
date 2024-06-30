@@ -28,7 +28,7 @@ Before you begin, ensure you have met the following requirements:
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/verifyai.git
+   git clone https://github.com/camerartsp/Verify-AI.git
    cd verifyai
    ```
 
