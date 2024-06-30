@@ -13,6 +13,7 @@
             -webkit-box-orient: vertical;
             overflow: hidden;
         }
+
         .modal-backdrop {
             position: fixed;
             top: 0;
@@ -26,7 +27,7 @@
             align-items: center;
             z-index: 1000;
         }
-        
+
         .modal-content {
             background-color: white;
             padding: 2rem;
@@ -35,23 +36,27 @@
             max-height: 90%;
             overflow-y: auto;
         }
+
         .topic {
             margin-bottom: 1.5rem;
             padding: 1rem;
             background-color: #f3f4f6;
             border-radius: 0.5rem;
         }
+
         .topic-title {
             font-weight: bold;
             font-size: 1.1rem;
             margin-bottom: 0.5rem;
             color: #1e40af;
         }
+
         .subtopic {
             margin-top: 0.5rem;
             padding-left: 1rem;
             border-left: 2px solid #60a5fa;
         }
+
         .subtopic-title {
             font-weight: bold;
             color: #2563eb;
@@ -63,6 +68,7 @@
             align-items: center;
             height: 20px;
         }
+
         .dot {
             width: 8px;
             height: 8px;
@@ -71,16 +77,56 @@
             margin: 0 4px;
             animation: bounce 0.6s infinite alternate;
         }
+
         .dot:nth-child(2) {
             animation-delay: 0.2s;
         }
+
         .dot:nth-child(3) {
             animation-delay: 0.4s;
         }
+
         @keyframes bounce {
             to {
                 transform: translateY(-8px);
             }
+        }
+
+        #previewContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .preview-item img,
+        .preview-item video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            cursor: pointer;
         }
     </style>
 </head>
@@ -101,12 +147,16 @@
                     informações.
                 </p>
             </div>
+            <div id="previewContainer" class="mt-4"></div>
             <div class="relative">
                 <div class="flex items-center bg-white dark:bg-gray-800 rounded-lg shadow-md">
                     <input id="newsInput"
                         class="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 py-3 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                         placeholder="Digite a notícia para verificar" type="text" />
-                    <input type="file" id="mediaInput" class="hidden" multiple onchange="uploadMedia(event)" />
+
+                    <input type="file" id="mediaInput" class="hidden" multiple accept="image/*,video/*" multiple
+                        onchange="handleFileUpload(event)" />
+
                     <button onclick="document.getElementById('mediaInput').click()"
                         class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-10 w-10 rounded-l-lg">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -135,14 +185,19 @@
             </div>
             <div id="resultContainer" class="hidden bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 space-y-4">
                 <div class="flex items-center justify-between">
-                    <h2 id="resultTitle" class="text-lg font-bold text-gray-900 dark:text-gray-100">Resultado da Verificação</h2>
-                    <div id="resultStatus" class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">Confiável</div>
+                    <h2 id="resultTitle" class="text-lg font-bold text-gray-900 dark:text-gray-100">Resultado da
+                        Verificação</h2>
+                    <div id="resultStatus" class="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                        Confiável</div>
                 </div>
                 <div class="space-y-2">
                     <p id="resultText" class="text-gray-700 dark:text-gray-400 description-truncate"></p>
-                    <button id="readMoreBtn" class="text-blue-500 hover:text-blue-600 text-sm font-medium">Ler mais</button>
+                    <button id="readMoreBtn" class="text-blue-500 hover:text-blue-600 text-sm font-medium">Ler
+                        mais</button>
                     <div class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-gray-500 dark:text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="h-5 w-5 text-gray-500 dark:text-gray-400">
                             <circle cx="12" cy="12" r="10"></circle>
                             <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"></path>
                             <path d="M2 12h20"></path>
@@ -150,7 +205,9 @@
                         <span id="resultSource" class="text-gray-600 dark:text-gray-400">Fonte: www.exemplo.com</span>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5 text-green-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            class="h-5 w-5 text-green-500">
                             <circle cx="12" cy="12" r="10"></circle>
                             <path d="m9 12 2 2 4-4"></path>
                         </svg>
@@ -164,7 +221,8 @@
         <div class="modal-content bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
             <h2 id="modalTitle" class="text-2xl font-bold mb-4"></h2>
             <div id="modalContent" class="text-gray-700 dark:text-gray-300"></div>
-            <button id="closeModalBtn" class="mt-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-bold py-2 px-4 rounded">
+            <button id="closeModalBtn"
+                class="mt-4 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-900 dark:text-gray-100 font-bold py-2 px-4 rounded">
                 Fechar
             </button>
         </div>
@@ -175,118 +233,166 @@
     </footer>
 
     <script>
-        function uploadMedia(event) {
-            const files = event.target.files;
-            if (files.length > 0) {
-                // You can add logic here to handle the uploaded files
-                console.log('Files uploaded:', files);
-                // For example, you might want to display the file names
-                const fileNames = Array.from(files).map(file => file.name).join(', ');
-                alert(`Files selected: ${fileNames}`);
-            }
+            let uploadedFiles = [];
+
+function handleFileUpload(event) {
+    const files = event.target.files;
+    for (let file of files) {
+        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+            uploadedFiles.push(file);
+            displayPreview(file);
         }
-    
-    function truncateText(text, maxLength) {
-        if (text.length <= maxLength) return text;
-        return text.substr(0, maxLength) + '...';
+    }
+}
+
+function displayPreview(file) {
+    const previewContainer = document.getElementById('previewContainer');
+    const previewItem = document.createElement('div');
+    previewItem.className = 'preview-item';
+
+    const removeBtn = document.createElement('button');
+    removeBtn.className = 'remove-btn';
+    removeBtn.innerHTML = 'X';
+    removeBtn.onclick = () => removeFile(file, previewItem);
+
+    if (file.type.startsWith('image/')) {
+        const img = document.createElement('img');
+        img.src = URL.createObjectURL(file);
+        previewItem.appendChild(img);
+    } else if (file.type.startsWith('video/')) {
+        const video = document.createElement('video');
+        video.src = URL.createObjectURL(file);
+        video.controls = true;
+        previewItem.appendChild(video);
     }
 
-    function formatExplanation(text) {
-        const topics = text.split(/\*\*Tópico \d+:\*\*/g).filter(topic => topic.trim() !== '');
-        
-        return topics.map((topic, index) => {
-            const [title, ...content] = topic.split('\n').map(line => line.trim()).filter(line => line !== '');
-            const subtopics = content.join(' ').split(/\*\*\*/).filter(subtopic => subtopic.trim() !== '');
-            
-            const subtopicHTML = subtopics.map(subtopic => {
-                const [subtopicTitle, ...subtopicContent] = subtopic.split(':');
-                return `
-                    <div class="subtopic">
-                        <span class="subtopic-title">${subtopicTitle.trim()}:</span>
-                        ${subtopicContent.join(':').trim()}
-                    </div>
-                `;
-            }).join('');
+    previewItem.appendChild(removeBtn);
+    previewContainer.appendChild(previewItem);
+}
 
-            return `
-                <div class="topic">
-                    <div class="topic-title">Tópico ${index + 1}: ${title}</div>
-                    ${subtopicHTML}
+function removeFile(file, previewItem) {
+    uploadedFiles = uploadedFiles.filter(f => f !== file);
+    previewItem.remove();
+}
+
+async function verifyNews() {
+    const newsInput = document.getElementById('newsInput').value;
+    const mediaInput = document.getElementById('mediaInput').files;
+    const resultContainer = document.getElementById('resultContainer');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultStatus = document.getElementById('resultStatus');
+    const resultText = document.getElementById('resultText');
+    const readMoreBtn = document.getElementById('readMoreBtn');
+    const resultAccuracy = document.getElementById('resultAccuracy');
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalContent = document.getElementById('modalContent');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const loadingDots = document.querySelector('.loading-dots');
+
+    loadingDots.style.display = 'flex';
+    resultContainer.classList.add('hidden');
+
+    try {
+        const formData = new FormData();
+        formData.append('text', newsInput);
+        uploadedFiles.forEach((file, index) => {
+            formData.append(`media`, file);
+        });
+
+        const response = await fetch('/analisar', {
+            method: 'POST',
+            body: formData
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log('Resultado recebido:', result);
+
+        resultTitle.innerText = 'Resultado da Verificação';
+        resultStatus.innerText = result.eConfiavel ? 'Confiável' : 'Não Confiável';
+        resultStatus.className = result.eConfiavel ? 'bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium' : 'bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium';
+
+        const truncatedText = truncateText(result.explicacao || 'Resultado da análise indisponível.', 100);
+        resultText.innerText = truncatedText;
+        readMoreBtn.classList.remove('hidden');
+
+        readMoreBtn.onclick = function () {
+            modalTitle.innerText = result.eConfiavel ? 'Explicação: Conteúdo Confiável' : 'Explicação: Conteúdo Não Confiável';
+            const formattedExplanation = formatExplanation(result.explicacao || 'Resultado da análise indisponível.');
+            modalContent.innerHTML = `
+                <div class="prose prose-sm sm:prose lg:prose-lg xl:prose-xl dark:prose-invert">
+                    ${formattedExplanation}
                 </div>
             `;
-        }).join('');
+            modal.classList.remove('hidden');
+        };
+
+        closeModalBtn.onclick = function () {
+            modal.classList.add('hidden');
+        };
+
+        resultAccuracy.innerText = `Precisão: ${result.pontuacaoCredibilidade || 'N/A'}`;
+
+        resultContainer.classList.remove('hidden');
+    } catch (error) {
+        console.error('Erro ao verificar o conteúdo:', error);
+        resultTitle.innerText = 'Erro na Verificação';
+        resultStatus.innerText = 'Erro';
+        resultStatus.className = 'bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium';
+        resultText.innerText = 'Não foi possível verificar o conteúdo. Por favor, tente novamente mais tarde.';
+        readMoreBtn.classList.add('hidden');
+        resultAccuracy.innerText = '';
+    } finally {
+        loadingDots.style.display = 'none';
+        resultContainer.classList.remove('hidden');
     }
+}
 
-    async function verifyNews() {
-        const newsInput = document.getElementById('newsInput').value;
-        const mediaInput = document.getElementById('mediaInput').files;
-        const resultContainer = document.getElementById('resultContainer');
-        const resultTitle = document.getElementById('resultTitle');
-        const resultStatus = document.getElementById('resultStatus');
-        const resultText = document.getElementById('resultText');
-        const readMoreBtn = document.getElementById('readMoreBtn');
-        const resultSource = document.getElementById('resultSource');
-        const resultAccuracy = document.getElementById('resultAccuracy');
-        const modal = document.getElementById('modal');
-        const modalTitle = document.getElementById('modalTitle');
-        const modalContent = document.getElementById('modalContent');
-        const closeModalBtn = document.getElementById('closeModalBtn');
-        const loadingDots = document.querySelector('.loading-dots');
+function formatExplanation(text) {
+    if (!text) return '<p>Nenhuma explicação disponível.</p>';
 
-        loadingDots.style.display = 'flex';
-        resultContainer.classList.add('hidden');
+    const lines = text.split('\n');
+    let formattedHtml = '';
+    let inList = false;
 
-        try {
-                const formData = new FormData();
-                formData.append('text', newsInput);
-                if (mediaInput.length > 0) {
-                    formData.append('image', mediaInput[0]);
-                }
-
-                const response = await fetch('/analisar', {
-                    method: 'POST',
-                    body: formData
-                });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+    lines.forEach(line => {
+        line = line.trim();
+        if (line.startsWith('# ')) {
+            formattedHtml += `<h1 class="text-2xl font-bold mb-4">${line.substring(2)}</h1>`;
+        } else if (line.startsWith('## ')) {
+            formattedHtml += `<h2 class="text-xl font-semibold mb-3">${line.substring(3)}</h2>`;
+        } else if (line.startsWith('- ')) {
+            if (!inList) {
+                formattedHtml += '<ul class="list-disc pl-5 mb-3">';
+                inList = true;
             }
-
-            const result = await response.json();
-
-            resultTitle.innerText = 'Resultado da Verificação';
-            resultStatus.innerText = result.eConfiavel ? 'Confiável' : 'Não Confiável';
-            resultStatus.className = result.eConfiavel ? 'bg-green-500 text-white px-3 py-1 rounded-full text-xs font-medium' : 'bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium';
-            
-            const truncatedText = truncateText(result.explicacao || 'Resultado da análise indisponível.', 100);
-            resultText.innerText = truncatedText;
-            
-            readMoreBtn.onclick = function() {
-                modalTitle.innerText = result.eConfiavel ? 'Explicação: Notícia Confiável' : 'Explicação: Notícia Não Confiável';
-                modalContent.innerHTML = formatExplanation(result.explicacao || 'Resultado da análise indisponível.');
-                modal.classList.remove('hidden');
-            };
-
-            closeModalBtn.onclick = function() {
-                modal.classList.add('hidden');
-            };
-
-            resultSource.innerText = `Fonte: ${result.source || 'Indefinida'}`;
-            resultAccuracy.innerText = `Precisão: ${result.pontuacaoCredibilidade || 'N/A'}`;
-        } catch (error) {
-            console.error('Erro ao verificar a notícia:', error);
-            resultTitle.innerText = 'Erro na Verificação';
-            resultStatus.innerText = 'Erro';
-            resultStatus.className = 'bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium';
-            resultText.innerText = 'Não foi possível verificar a notícia. Por favor, tente novamente mais tarde.';
-            readMoreBtn.classList.add('hidden');
-            resultSource.innerText = '';
-            resultAccuracy.innerText = '';
-        } finally {
-            loadingDots.style.display = 'none';
-            resultContainer.classList.remove('hidden');
+            formattedHtml += `<li>${line.substring(2)}</li>`;
+        } else {
+            if (inList) {
+                formattedHtml += '</ul>';
+                inList = false;
+            }
+            if (line) {
+                formattedHtml += `<p class="mb-3">${line}</p>`;
+            }
         }
+    });
+
+    if (inList) {
+        formattedHtml += '</ul>';
     }
+
+    return formattedHtml;
+}
+
+function truncateText(text, maxLength) {
+    if (text.length <= maxLength) return text;
+    return text.substr(0, maxLength) + '...';
+}
     </script>
 </body>
 

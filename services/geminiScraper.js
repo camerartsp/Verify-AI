@@ -8,113 +8,97 @@ require("dotenv").config();
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-const model = genAI.getGenerativeModel({
-  model: "gemini-1.5-pro",
-  systemInstruction: `
-    Você é um especialista em análise de notícias e verificação de fatos. 
-    Sua tarefa é avaliar a credibilidade de artigos de notícias com base em critérios como:
-    - A precisão das informações apresentadas.
-    - A presença de fontes confiáveis.
-    - A ausência de vieses evidentes.
-    - O contexto e a completude da informação fornecida.
-    Sua resposta deve ser objetiva e seguir o formato solicitado.
-  `,
-});
+const systemInstruction = "Você é um assistente especializado em análise de conteúdo e detecção de notícias falsas. Sua tarefa é analisar o conteúdo fornecido e determinar sua credibilidade. Forneça uma pontuação de credibilidade de 0 a 100, onde 0 é completamente falso e 100 é completamente verdadeiro. Além disso, forneça uma breve explicação para sua avaliação. Responda APENAS no seguinte formato: Pontuação de Credibilidade: [número]; Explicação: [sua explicação]";
 
-const generationConfig = {
-  temperature: 0.7,
-  topP: 0.8,
-  topK: 40,
-  maxOutputTokens: 1024,
-};
+const model = genAI.getGenerativeModel({ 
+  model: "gemini-1.5-pro",
+  generationConfig: {
+    temperature: 1,
+    topP: 0.8,
+    topK: 40,
+    maxOutputTokens: 1024,
+  },
+  safetySettings: [
+    {
+      category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+      threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
+    },
+  ],
+});
 
 async function fileToBase64(filePath) {
   const fileContent = await fs.readFile(filePath);
   return fileContent.toString('base64');
 }
 
-async function analisarNoticia(texto, imagem, video) {
+async function analisarNoticia(texto, arquivos) {
   try {
-    let conteudo = texto || '';
     let parts = [];
 
-    if (conteudo) {
-      parts.push({ text: conteudo });
+    if (texto) {
+      parts.push({ text: `Analise o seguinte texto: "${texto}"` });
     }
 
-    if (imagem) {
-      const base64Image = await fileToBase64(imagem.path);
-      parts.push({
-        inlineData: {
-          mimeType: imagem.mimetype,
-          data: base64Image,
-        },
-      });
+    if (arquivos && arquivos.length > 0) {
+      for (let arquivo of arquivos) {
+        const base64Content = await fileToBase64(arquivo.path);
+        parts.push({
+          inlineData: {
+            mimeType: arquivo.mimetype,
+            data: base64Content,
+          },
+        });
+        parts.push({ text: `Analise a mídia acima.` });
+      }
     }
 
-    if (video) {
-      const base64Video = await fileToBase64(video.path);
-      parts.push({
-        inlineData: {
-          mimeType: video.mimetype,
-          data: base64Video,
-        },
-      });
-    }
-
-    const prompt = `
-      Analise o seguinte conteúdo (que pode incluir texto, imagem e/ou vídeo) e determine se é confiável ou não. 
-      Forneça uma pontuação de credibilidade de 0 a 100, onde 0 é completamente falso e 100 é completamente verdadeiro.
-      Além disso, forneça uma breve explicação para sua avaliação.
-
-      Responda no seguinte formato:
-      Pontuação de Credibilidade: [número]
-      Explicação: [sua explicação]
-    `;
-
-    parts.push({ text: prompt });
-
-    const chatSession = model.startChat({
-      generationConfig,
-      safetySettings: [
-        {
-          category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-          threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE,
-        },
+    const result = await model.generateContent({
+      contents: [
+        { role: "user", parts: parts }
       ],
+      generationConfig: {
+        temperature: 1,
+        topP: 0.8,
+        topK: 40,
+        maxOutputTokens: 1024,
+      },
+      systemInstruction: systemInstruction
     });
 
-    const result = await chatSession.sendMessage(parts);
     const resposta = result.response.text();
+    console.log("Resposta completa da API:", resposta);
 
-    const linhas = resposta.split('\n');
-    const pontuacaoLinha = linhas.find(linha => linha.includes('Pontuação de Credibilidade:'));
-    const explicacaoInicio = linhas.findIndex(linha => linha.includes('Explicação:'));
+    const pontuacaoMatch = resposta.match(/Pontuação de Credibilidade:\s*(\d+)/i);
+    const explicacaoMatch = resposta.match(/Explicação:\s*([\s\S]+)/i);
 
-    if (!pontuacaoLinha || explicacaoInicio === -1) {
-      throw new Error('Formato de resposta inesperado.');
+    if (!pontuacaoMatch || !explicacaoMatch) {
+      console.log("Formato de resposta inesperado. Resposta completa:", resposta);
+      return {
+        pontuacaoCredibilidade: 0,
+        explicacao: "Não foi possível analisar o conteúdo. Por favor, tente novamente.",
+        eConfiavel: false
+      };
     }
 
-    const pontuacaoCredibilidade = parseInt(pontuacaoLinha.split(':')[1].trim());
-    const explicacao = linhas.slice(explicacaoInicio + 1).join('\n').trim();
+    const pontuacaoCredibilidade = parseInt(pontuacaoMatch[1]);
+    const explicacao = explicacaoMatch[1].trim();
 
-    // Limpar arquivos temporários
-    if (imagem) await fs.unlink(imagem.path);
-    if (video) await fs.unlink(video.path);
+    console.log("Pontuação de Credibilidade:", pontuacaoCredibilidade);
+    console.log("Explicação:", explicacao);
 
     return {
-      pontuacaoCredibilidade,
+      pontuacaoCredibilidade: isNaN(pontuacaoCredibilidade) ? 0 : pontuacaoCredibilidade,
       explicacao,
       eConfiavel: pontuacaoCredibilidade >= 70,
     };
 
   } catch (erro) {
-    console.error('Erro:', erro);
-    // Limpar arquivos temporários em caso de erro
-    if (imagem) await fs.unlink(imagem.path).catch(() => {});
-    if (video) await fs.unlink(video.path).catch(() => {});
+    console.error('Erro detalhado:', erro);
     return {
-      erro: 'Erro ao analisar o artigo. Por favor, tente novamente.',
+      pontuacaoCredibilidade: 0,
+      explicacao: 'Erro ao analisar o conteúdo. Por favor, tente novamente.',
+      eConfiavel: false,
+      detalhes: erro.message
     };
   }
 }
