@@ -68,26 +68,38 @@ async function analisarNoticia(texto, arquivos) {
     const resposta = result.response.text();
     console.log("Resposta completa da API:", resposta);
 
-    const pontuacaoMatch = resposta.match(/Pontuação de Credibilidade:\s*(\d+)/i);
+    // Parse the response
+    let pontuacaoCredibilidade = 0;
+    let explicacao = "";
+
+    const pontuacaoMatch = resposta.match(/Pontuação de Credibilidade:\s*(.*?);/i);
     const explicacaoMatch = resposta.match(/Explicação:\s*([\s\S]+)/i);
 
-    if (!pontuacaoMatch || !explicacaoMatch) {
-      console.log("Formato de resposta inesperado. Resposta completa:", resposta);
-      return {
-        pontuacaoCredibilidade: 0,
-        explicacao: "Não foi possível analisar o conteúdo. Por favor, tente novamente.",
-        eConfiavel: false
-      };
+    if (pontuacaoMatch) {
+      const pontuacaoStr = pontuacaoMatch[1].trim();
+      if (pontuacaoStr.toLowerCase() === "não aplicável") {
+        pontuacaoCredibilidade = 0;
+      } else {
+        pontuacaoCredibilidade = parseInt(pontuacaoStr);
+      }
     }
 
-    const pontuacaoCredibilidade = parseInt(pontuacaoMatch[1]);
-    const explicacao = explicacaoMatch[1].trim();
+    if (explicacaoMatch) {
+      explicacao = explicacaoMatch[1].trim();
+    } else {
+      explicacao = resposta; // Use the entire response as explanation if no specific explanation is found
+    }
+
+    // If pontuacaoCredibilidade is NaN, set it to 0
+    if (isNaN(pontuacaoCredibilidade)) {
+      pontuacaoCredibilidade = 0;
+    }
 
     console.log("Pontuação de Credibilidade:", pontuacaoCredibilidade);
     console.log("Explicação:", explicacao);
 
     return {
-      pontuacaoCredibilidade: isNaN(pontuacaoCredibilidade) ? 0 : pontuacaoCredibilidade,
+      pontuacaoCredibilidade,
       explicacao,
       eConfiavel: pontuacaoCredibilidade >= 70,
     };
