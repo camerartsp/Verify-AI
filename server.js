@@ -2,7 +2,7 @@ const express = require('express');
 const multer = require('multer');
 const fs = require('fs').promises;
 const path = require('path');
-const { analisarNoticia } = require('./services/geminiScraper');
+const { analisarNoticia } = require('./services/geminiService');
 
 const app = express();
 const porta = 3000;
@@ -36,14 +36,15 @@ app.post('/analisar', function(req, res) {
 
         try {
             const texto = req.body.text;
+            const url = req.body.url;
             const arquivos = req.files;
 
-            if (!texto && (!arquivos || arquivos.length === 0)) {
-                return res.status(400).json({ erro: 'É necessário fornecer pelo menos texto ou mídia.' });
+            if (!texto && !url && (!arquivos || arquivos.length === 0)) {
+                return res.status(400).json({ erro: 'É necessário fornecer pelo menos texto, URL ou mídia.' });
             }
 
-            console.log('Analisando:', texto ? 'Texto' : 'Mídia');
-            const resultado = await analisarNoticia(texto, arquivos);
+            console.log('Analisando:', texto ? 'Texto' : url ? 'URL' : 'Mídia');
+            const resultado = await analisarNoticia(texto, arquivos, url);
             console.log('Resposta completa da API:', JSON.stringify(resultado, null, 2));
 
             const respostaFinal = {
