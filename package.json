@@ -4,7 +4,7 @@
   "description": "VerifyAI é uma aplicação web que utiliza IA para analisar a confiabilidade de notícias. Ele extrai texto de artigos de notícias, envia o texto para a API Gemini para análise e exibe um resumo, uma pontuação de precisão e uma indicação de confiabilidade.",
   "main": "server.js",
   "scripts": {
-    "build": "npx puppeteer browsers install chrome",
+    "prebuild": "npx puppeteer browsers install chrome",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
