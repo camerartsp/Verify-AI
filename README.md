@@ -11,7 +11,7 @@ VerifyAI is a web application that uses artificial intelligence to analyze and v
 ## Demo Video
 Check out our demo video to see VerifyAI in action:
 
-[![VerifyAI Demo](https://img.youtube.com/vi/FcRqOe0kXKQ?si=gZGFvslUhhHo-8Z8)](https://youtu.be/FcRqOe0kXKQ?si=gZGFvslUhhHo-8Z8)
+[![VerifyAI Demo](https://img.youtube.com/vi/FcRqOe0kXKQ/0.jpg)](https://youtu.be/FcRqOe0kXKQ?si=gZGFvslUhhHo-8Z8)
 
 ## Tech Stack
 - Frontend: HTML, CSS (Tailwind CSS), JavaScript
