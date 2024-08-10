@@ -6,10 +6,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const { latitude, longitude } = position.coords;
             fetchRegionFromCoords(latitude, longitude);
         }, () => {
-            fetchRecentNews(); // Padrão para notícias gerais se a geolocalização falhar
+            fetchRecentNews();
         });
     } else {
-        fetchRecentNews(); // Padrão para notícias gerais se a geolocalização não for suportada
+        fetchRecentNews();
     }
 });
 
@@ -17,11 +17,11 @@ async function fetchRegionFromCoords(lat, lng) {
     try {
         const response = await fetch(`https://geocode.xyz/${lat},${lng}?geoit=json`);
         const data = await response.json();
-        const country = data.country; // Identifica o país a partir das coordenadas
-        fetchRecentNews(country); // Busca notícias com base na região detectada
+        const country = data.country;
+        fetchRecentNews(country);
     } catch (error) {
         console.error('Erro ao determinar a região:', error);
-        fetchRecentNews(); // Padrão para notícias gerais se a API de geocodificação falhar
+        fetchRecentNews();
     }
 }
 
@@ -32,12 +32,12 @@ document.getElementById('regionSelect').addEventListener('change', () => {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    fetchRecentNews();  // Busca as notícias ao carregar a página
+    fetchRecentNews();
 });
 
 async function fetchRecentNews(region = '') {
-    const apiKey = 'AIzaSyDqKm07aeu4PuZmoywBjMK6198BauN5Xt4';
-    const cx = '6328591933693477a';
+    const apiKey = 'your_api_key_google';
+    const cx = 'your_id_search_engine_google';
     let query = 'notícias recentes';
     
     if (region) {
@@ -57,19 +57,18 @@ async function fetchRecentNews(region = '') {
 
 function displayRecentNews(newsItems) {
     const newsFeed = document.getElementById('newsFeed');
-    newsFeed.innerHTML = ''; // Limpa os resultados anteriores
+    newsFeed.innerHTML = ''; 
 
     if (newsItems && newsItems.length > 0) {
         newsItems.forEach(item => {
             const newsElement = document.createElement('div');
-            newsElement.classList.add('topic', 'cursor-pointer');  // Adiciona a classe cursor-pointer
+            newsElement.classList.add('topic', 'cursor-pointer'); 
             newsElement.innerHTML = `
                 <h3 class="topic-title">${item.title}</h3>
                 <p class="description-truncate">${item.snippet}</p>
                 <a href="${item.link}" target="_blank" class="text-blue-500">Leia mais</a>
             `;
 
-            // Adiciona evento de clique para inserir a URL no campo de entrada
             newsElement.addEventListener('click', () => {
                 document.getElementById('newsInput').value = item.link;
             });
@@ -81,13 +80,11 @@ function displayRecentNews(newsItems) {
     }
 }
 
-// Evento para alterar a região das notícias
 document.getElementById('regionSelect').addEventListener('change', (event) => {
     const region = event.target.value;
     fetchRecentNews(region);
 });
 
-// Carregar as notícias recentes ao carregar a página
 fetchRecentNews('');
 
 document.getElementById('verifyButton').addEventListener('click', () => {
