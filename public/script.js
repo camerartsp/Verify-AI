@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
 async function fetchRecentNews(region = '') {
     const apiKey = 'your_api_key_google';
     const cx = 'your_id_search_engine_google';
-    let query = 'notícias recentes';
+    let query = 'recent news';
     
     if (region) {
         query += ` ${region}`;
