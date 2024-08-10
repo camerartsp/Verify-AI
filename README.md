@@ -2,11 +2,13 @@
 VerifyAI is a web application that uses artificial intelligence to analyze and verify the credibility of news articles. It provides users with a quick and accurate assessment of the authenticity of information, helping to combat the spread of misinformation.
 
 ## Features
-- Text-based news analysis
-- Image and video content analysis (future feature)
-- Credibility scoring from 0 to 100
-- Detailed explanation of the credibility assessment
-- User-friendly web interface
+- **Análise de notícias baseadas em texto**: Verifica a autenticidade de notícias inseridas manualmente.
+- **Análise de conteúdo de imagens e vídeos** (futuro recurso): Permite a análise de mídias relacionadas às notícias.
+- **Pontuação de credibilidade de 0 a 100**: Avalia a confiabilidade das notícias.
+- **Explicação detalhada da avaliação de credibilidade**: Fornece detalhes sobre a análise realizada.
+- **Interface web amigável**: Design intuitivo e fácil de usar.
+- **Feed de notícias recentes**: Exibe notícias recentes separadas com base na região escolhida pelo usuário.
+- **Selecionador de região**: Permite ao usuário escolher a região para filtrar as notícias recentes.
 
 ## Demo Video
 Check out our demo video to see VerifyAI in action:
