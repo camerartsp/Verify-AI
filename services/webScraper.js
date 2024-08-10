@@ -18,7 +18,7 @@ async function extractContentFromUrl(url) {
       return {
         title,
         metaDescription,
-        bodyText: bodyText.slice(0, 5000) // Limit to first 5000 characters
+        bodyText: bodyText.slice(0, 5000)
       };
     });
     

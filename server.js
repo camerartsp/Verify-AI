@@ -43,9 +43,7 @@ app.post('/analisar', function(req, res) {
                 return res.status(400).json({ erro: 'É necessário fornecer pelo menos texto, URL ou mídia.' });
             }
 
-            console.log('Analisando:', texto ? 'Texto' : url ? 'URL' : 'Mídia');
             const resultado = await analisarNoticia(texto, arquivos, url);
-            console.log('Resposta completa da API:', JSON.stringify(resultado, null, 2));
 
             const respostaFinal = {
                 pontuacaoCredibilidade: resultado.pontuacaoCredibilidade,
@@ -53,12 +51,11 @@ app.post('/analisar', function(req, res) {
                 eConfiavel: resultado.eConfiavel
             };
 
-            console.log('Resultado processado:', JSON.stringify(respostaFinal, null, 2));
             res.json(respostaFinal);
 
         } catch (error) {
-            console.error('Erro detalhado:', error);
-            res.status(500).json({ erro: 'Falha ao analisar o conteúdo.', detalhes: error.message });
+            console.error('Erro ao analisar o conteúdo:', error.message);
+            res.status(500).json({ erro: 'Falha ao analisar o conteúdo.' });
         } finally {
             if (req.files && req.files.length > 0) {
                 for (let arquivo of req.files) {
@@ -70,5 +67,5 @@ app.post('/analisar', function(req, res) {
 });
 
 app.listen(porta, () => {
-    console.log(`Servidor rodando em http://localhost:${porta}`);
+    console.log(`Servidor rodando na porta ${porta}`);
 });
