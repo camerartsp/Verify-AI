@@ -99,9 +99,9 @@ Remember to keep your API key confidential and never share it publicly. Consider
 ## Project Structure
 
 - `public/index.html`: Main HTML file for the web interface
-- `public/js/script.js`: JavaScript file containing client-side logic
+- `public/script.js`: JavaScript file containing client-side logic
 - `server.js`: Express server setup and route handling
-- `services/geminiScraper.js`: Integration with Gemini AI for content analysis
+- `services/geminiService.js`: Integration with Gemini AI for content analysis
 - `uploads/`: Temporary storage for uploaded media files
 
 ## Contributing
